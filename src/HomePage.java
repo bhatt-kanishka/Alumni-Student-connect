@@ -18,15 +18,17 @@ public class HomePage extends JFrame {
 
     private String userName;
     private String userRole;
+    private int userId;
     private JPanel tabContent;
     private CardLayout cardLayout;
     private JButton suggestionsTab, exploreTab;
 
-    public HomePage(String name, String role) {
-        this.userName = name;
-        this.userRole = role;
-        initUI();
-    }
+    public HomePage(String name, String role, int userId) {
+    this.userName = name;
+    this.userRole = role;
+    this.userId = userId;
+    initUI();
+}
 
     private void initUI() {
         setTitle("AlumniConnect - Home");
@@ -45,37 +47,42 @@ public class HomePage extends JFrame {
         setVisible(true);
     }
 
-    private JPanel buildTopBar() {
-        JPanel bar = new JPanel(new BorderLayout());
-        bar.setBackground(DARKER_BLUE);
-        bar.setBorder(new EmptyBorder(10, 20, 10, 20));
-        bar.setPreferredSize(new Dimension(0, 68));
+private JPanel buildTopBar() {
+    JPanel bar = new JPanel(new BorderLayout());
+    bar.setBackground(DARKER_BLUE);
+    bar.setBorder(new EmptyBorder(10, 20, 10, 20));
+    bar.setPreferredSize(new Dimension(0, 68));
 
-        JPanel leftPanel = new JPanel(new FlowLayout(FlowLayout.LEFT, 0, 0));
-        leftPanel.setOpaque(false);
-        leftPanel.add(buildAvatar(userName, 44));
-        bar.add(leftPanel, BorderLayout.WEST);
+    JPanel leftPanel = new JPanel(new FlowLayout(FlowLayout.LEFT, 0, 0));
+    leftPanel.setOpaque(false);
+    leftPanel.add(buildAvatar(userName, 44));
+    bar.add(leftPanel, BorderLayout.WEST);
 
-        JLabel title = new JLabel("Alumni Connect", SwingConstants.CENTER);
-        title.setFont(new Font("SansSerif", Font.BOLD, 22));
-        title.setForeground(BEIGE);
-        bar.add(title, BorderLayout.CENTER);
+    JLabel title = new JLabel("Alumni Connect", SwingConstants.CENTER);
+    title.setFont(new Font("SansSerif", Font.BOLD, 22));
+    title.setForeground(BEIGE);
+    bar.add(title, BorderLayout.CENTER);
 
-        JPanel rightPanel = new JPanel(new FlowLayout(FlowLayout.RIGHT, 10, 0));
-        rightPanel.setOpaque(false);
+    JPanel rightPanel = new JPanel(new FlowLayout(FlowLayout.RIGHT, 10, 0));
+    rightPanel.setOpaque(false);
 
-        JButton profileBtn = createNavButton("My Profile", LIGHT_BLUE, WHITE);
-        profileBtn.addActionListener(e -> openProfile());
+    JButton dashboardBtn = createNavButton("Dashboard", GREEN, WHITE);
+    dashboardBtn.addActionListener(e -> openDashboard());
 
-        JButton logoutBtn = createNavButton("Logout", new Color(0xCC3333), WHITE);
-        logoutBtn.addActionListener(e -> logout());
+    JButton profileBtn = createNavButton("My Profile", LIGHT_BLUE, WHITE);
+    profileBtn.addActionListener(e -> openProfile());
 
-        rightPanel.add(profileBtn);
-        rightPanel.add(logoutBtn);
-        bar.add(rightPanel, BorderLayout.EAST);
+    JButton logoutBtn = createNavButton("Logout", new Color(0xCC3333), WHITE);
+    logoutBtn.addActionListener(e -> logout());
 
-        return bar;
-    }
+    rightPanel.add(dashboardBtn);
+    rightPanel.add(profileBtn);
+    rightPanel.add(logoutBtn);
+
+    bar.add(rightPanel, BorderLayout.EAST);
+
+    return bar;
+}
 
     private JPanel buildTabsBar() {
         JPanel wrapper = new JPanel(new BorderLayout());
@@ -709,10 +716,68 @@ public class HomePage extends JFrame {
         }
     }
 
-    private void openProfile() {
+  
+
+private void openDashboard() {
+    try {
+        if (userRole.equalsIgnoreCase("student")) {
+            new StudentDashboard(userId, userName);
+        } 
+        else if (userRole.equalsIgnoreCase("alumni")) {
+            new AlumniDashboard(userId);
+        } 
+        else if (
+            userRole.equalsIgnoreCase("IT_ADMIN") ||
+            userRole.equalsIgnoreCase("PROFESSOR") ||
+            userRole.equalsIgnoreCase("HOD") ||
+            userRole.equalsIgnoreCase("APO_ADMIN") ||
+            userRole.equalsIgnoreCase("PLACEMENT")
+        ) {
+            new AdminDashboard(userId);
+        }
+        else {
+            JOptionPane.showMessageDialog(this,
+                    "Unknown role: " + userRole,
+                    "Role Error",
+                    JOptionPane.ERROR_MESSAGE);
+            return;
+        }
+
         dispose();
-        new ProfilePage(userName, userRole);
+
+    } catch (Exception ex) {
+        ex.printStackTrace();
+        JOptionPane.showMessageDialog(this,
+                "Dashboard could not open:\n" + ex.getMessage());
     }
+}
+
+private void openProfile() {
+    try {
+        if (userRole.equalsIgnoreCase("student")) {
+            new StudentProfilePage(userId);
+        } 
+        else if (userRole.equalsIgnoreCase("alumni")) {
+            JOptionPane.showMessageDialog(this,
+                    "Alumni profile page is not active yet.",
+                    "Coming Soon",
+                    JOptionPane.INFORMATION_MESSAGE);
+        } 
+        else {
+            JOptionPane.showMessageDialog(this,
+                    "Admin profile page is not active yet.",
+                    "Coming Soon",
+                    JOptionPane.INFORMATION_MESSAGE);
+        }
+
+    } catch (Exception ex) {
+        ex.printStackTrace();
+        JOptionPane.showMessageDialog(this,
+                "Profile could not open:\n" + ex.getMessage(),
+                "Profile Error",
+                JOptionPane.ERROR_MESSAGE);
+    }
+}
 
     private void logout() {
         dispose();

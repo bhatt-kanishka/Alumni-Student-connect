@@ -6,6 +6,9 @@ import javax.swing.*;
 
 public class LoginPage extends JFrame implements ActionListener {
 
+
+    private String allowedRole = "all"; 
+
     // ── Palette ──────────────────────────────────────────────────
     static final Color YALE_BLUE     = new Color(0x00, 0x3B, 0x6B);
     static final Color YALE_HOVER    = new Color(0x00, 0x52, 0x96);
@@ -20,6 +23,11 @@ public class LoginPage extends JFrame implements ActionListener {
     JButton        loginBtn;
 
     LoginPage() {
+    this("all");
+}
+
+    LoginPage(String allowedRole) {
+    this.allowedRole = allowedRole;
         setTitle("AlumniConnect – Login");
         setSize(1100, 680);
         setMinimumSize(new Dimension(900, 560));
@@ -310,7 +318,7 @@ public class LoginPage extends JFrame implements ActionListener {
     return "User";
 }
 
-  @Override
+ 
 public void actionPerformed(ActionEvent e) {
     String email = emailField.getText().trim();
     String pass  = new String(passField.getPassword());
@@ -335,11 +343,17 @@ public void actionPerformed(ActionEvent e) {
         if (rs.next()) {
             int userId = rs.getInt("user_id");
             String role = rs.getString("role");
-
+            if (!allowedRole.equalsIgnoreCase("all") && !role.equalsIgnoreCase(allowedRole)) {
+            JOptionPane.showMessageDialog(this,
+            "You are not allowed to login from this page.",
+            "Wrong Login Page",
+            JOptionPane.WARNING_MESSAGE);
+    return;
+}
             String name = getUserName(con, userId, role);
 
             dispose();
-            new HomePage(name, role);
+            new HomePage(name, role, userId);
 
         } else {
             shakeWindow();
